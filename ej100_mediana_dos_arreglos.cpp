@@ -1,88 +1,69 @@
-/*
- * Ejercicio 100. Mediana de dos arreglos ordenados
- * Nivel 5 - Reto/Experto
- *
- * Enunciado: Dados dos arreglos ordenados A y B, calcular la
- * mediana conjunta sin construir necesariamente un tercer arreglo
- * completo. Como reto, se busca complejidad O(log(min(N,M)))
- * mediante busqueda binaria por particiones.
- *
- * Entrada: NA, los NA valores de A, NB, los NB valores de B.
- *   Ejemplo: A: 1 3 8; B: 7 9 10 11
- * Salida esperada:
- *   Ejemplo: Mediana = 8
- *
- * Restriccion: resuelto con arreglos nativos, sin std::vector.
- */
+// EJERCICIO 100: Mediana de dos arreglos ordenados
+// Enunciado: Dados dos arreglos ordenados A y B, calcular la mediana conjunta sin construir necesariamente un tercer arreglo completo. Como reto, buscar O(log(min(N,M))).
+// Restricción: resolver sin std::vector.
+
+
+
 #include <iostream>
-#include <sstream>
-#include <string>
 using namespace std;
 
-const int MAX_N = 100;
-const long long INF = 2000000000LL;
-
-string formatearDecimal(double x) {
-    ostringstream oss;
-    oss.precision(6);
-    oss << fixed << x;
-    string s = oss.str();
-    size_t punto = s.find('.');
-    if (punto != string::npos) {
-        size_t ultimo = s.find_last_not_of('0');
-        if (ultimo == punto) ultimo--;
-        s = s.substr(0, ultimo + 1);
-    }
-    return s;
-}
-
 int main() {
-    int na, nb;
-    long long a[MAX_N], b[MAX_N];
+    const int N = 4, M = 4;
+    int A[N], B[M];
 
-    cin >> na;
-    for (int i = 0; i < na; i++) cin >> a[i];
-    cin >> nb;
-    for (int i = 0; i < nb; i++) cin >> b[i];
-
-    // Aseguramos que A sea el arreglo mas pequeno (o igual) para
-    // que la busqueda binaria sea O(log(min(N,M))).
-    long long *menor = a, *mayor = b;
-    int n = na, m = nb;
-    if (n > m) {
-        menor = b; mayor = a;
-        n = nb; m = na;
+    cout << "Ingrese " << N << " elementos de A (ordenados):" << endl;
+    for (int i = 0; i < N; i++) {
+        cout << "A[" << i << "]: ";
+        cin >> A[i];
+    }
+    cout << "Ingrese " << M << " elementos de B (ordenados):" << endl;
+    for (int i = 0; i < M; i++) {
+        cout << "B[" << i << "]: ";
+        cin >> B[i];
     }
 
-    int lo = 0, hi = n;
-    double mediana = 0;
+    // Búsqueda binaria sobre el arreglo más corto
+    int total = N + M;
+    int mitad = (total + 1) / 2;
 
-    while (lo <= hi) {
-        int i = (lo + hi) / 2;             // particion en el arreglo menor
-        int j = (n + m + 1) / 2 - i;        // particion en el arreglo mayor
-
-        long long izqMenor = (i == 0) ? -INF : menor[i - 1];
-        long long derMenor = (i == n) ? INF : menor[i];
-        long long izqMayor = (j == 0) ? -INF : mayor[j - 1];
-        long long derMayor = (j == m) ? INF : mayor[j];
-
-        if (izqMenor <= derMayor && izqMayor <= derMenor) {
-            if ((n + m) % 2 == 0) {
-                long long maxIzquierda = max(izqMenor, izqMayor);
-                long long minDerecha = min(derMenor, derMayor);
-                mediana = (maxIzquierda + minDerecha) / 2.0;
-            } else {
-                mediana = (double)max(izqMenor, izqMayor);
-            }
-            break;
-        } else if (izqMenor > derMayor) {
-            hi = i - 1;
-        } else {
-            lo = i + 1;
+    if (N > M) {
+        // Asegurar que A sea el más corto
+        for (int i = 0; i < N; i++) {
+            int aux = A[i];
+            A[i] = B[i];
+            B[i] = aux;
         }
     }
 
-    cout << "Mediana = " << formatearDecimal(mediana) << endl;
+    int bajo = 0, alto = N;
+    double mediana;
+
+    while (bajo <= alto) {
+        int i = (bajo + alto) / 2;
+        int j = mitad - i;
+
+        int Aizq = (i == 0 ? -1000000 : A[i - 1]);
+        int Ader = (i == N ? 1000000 : A[i]);
+        int Bizq = (j ==  ​0 ? -1000000 : B[j - 1]);
+        int Bder = (j == M ? 1000000 : B[j]);
+
+        if (Aizq <= Bder && Bizq <= Ader) {
+            if (total % 2 ==  ​1) {
+                mediana = (Aizq > Bizq ? Aizq : Bizq);
+            } else {
+                int maxIzq = (Aizq > Bizq ? Aizq : Bizq);
+                int minDer = (Ader < Bder ? Ader : Bder);
+                mediana = (maxIzq + minDer) / 2.0;
+            }
+break;
+        } else if (Aizq > Bder) {
+            alto = i - 1;
+        } else {
+            bajo = i + 1;
+        }
+    }
+
+    cout << "La mediana conjunta es: " << mediana << endl;
 
     return 0;
 }
